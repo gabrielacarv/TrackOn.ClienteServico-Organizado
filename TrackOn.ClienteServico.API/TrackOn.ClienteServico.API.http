@@ -1,0 +1,6 @@
+@TrackOn.ClienteServico.API_HostAddress = http://localhost:5190
+
+GET {{TrackOn.ClienteServico.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
