@@ -22,9 +22,9 @@ public class PainelServico : IPainelServico
         _painelRepositorio = painelRepositorio;
     }
 
-    public async Task<IEnumerable<PingPorHoraDTO>> ObterPingsPorHoraAsync(int clienteId, int? servicoId)
+    public async Task<IEnumerable<PingPorHoraDTO>> ObterPingsPorHoraAsync(int clienteId, int? servicoId, int dias)
     {
-        return await FiltrarLogs(clienteId, servicoId)
+        return await FiltrarLogs(clienteId, servicoId, dias)
             .GroupBy(l => l.HoraPing.Hour)
             .Select(g => new PingPorHoraDTO
             {
@@ -35,9 +35,9 @@ public class PainelServico : IPainelServico
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<DistribuicaoFalhaDTO>> ObterDistribuicaoFalhasAsync(int clienteId, int? servicoId)
+    public async Task<IEnumerable<DistribuicaoFalhaDTO>> ObterDistribuicaoFalhasAsync(int clienteId, int? servicoId, int dias)
     {
-        return await FiltrarLogs(clienteId, servicoId)
+        return await FiltrarLogs(clienteId, servicoId, dias)
             .Where(l => !EF.Functions.Like(l.Observacao, "%sucesso%"))
             .GroupBy(l => l.Servico.Url)
             .Select(g => new DistribuicaoFalhaDTO
@@ -49,9 +49,9 @@ public class PainelServico : IPainelServico
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<PercentualFalhaDTO>> ObterPercentualFalhasAsync(int clienteId, int? servicoId)
+    public async Task<IEnumerable<PercentualFalhaDTO>> ObterPercentualFalhasAsync(int clienteId, int? servicoId, int dias)
     {
-        return await FiltrarLogs(clienteId, servicoId)
+        return await FiltrarLogs(clienteId, servicoId, dias)
             .GroupBy(l => l.HoraPing.Date)
             .Select(g => new PercentualFalhaDTO
             {
@@ -64,9 +64,9 @@ public class PainelServico : IPainelServico
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<TotalPingServicoDTO>> ObterTotalPingsPorServicoAsync(int clienteId, int? servicoId)
+    public async Task<IEnumerable<TotalPingServicoDTO>> ObterTotalPingsPorServicoAsync(int clienteId, int? servicoId, int dias)
     {
-        return await FiltrarLogs(clienteId, servicoId)
+        return await FiltrarLogs(clienteId, servicoId, dias)
             .GroupBy(l => l.Servico.Url)
             .Select(g => new TotalPingServicoDTO
             {
@@ -77,9 +77,9 @@ public class PainelServico : IPainelServico
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<TotalPingFalhoServicoDTO>> ObterTotalPingsFalhosPorServicoAsync(int clienteId, int? servicoId)
+    public async Task<IEnumerable<TotalPingFalhoServicoDTO>> ObterTotalPingsFalhosPorServicoAsync(int clienteId, int? servicoId, int dias)
     {
-        return await FiltrarLogs(clienteId, servicoId)
+        return await FiltrarLogs(clienteId, servicoId, dias)
             .Where(l => !EF.Functions.Like(l.Observacao, "%sucesso%"))
             .GroupBy(l => l.Servico.Url)
             .Select(g => new TotalPingFalhoServicoDTO
@@ -91,9 +91,9 @@ public class PainelServico : IPainelServico
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<UptimeDiarioDTO>> ObterUptimeDiarioPorServicoAsync(int clienteId, int? servicoId)
+    public async Task<IEnumerable<UptimeDiarioDTO>> ObterUptimeDiarioPorServicoAsync(int clienteId, int? servicoId, int dias)
     {
-        return await FiltrarLogs(clienteId, servicoId)
+        return await FiltrarLogs(clienteId, servicoId, dias)
             .GroupBy(p => new { Data = p.HoraPing.Date, p.ServicoId })
             .Select(g => new UptimeDiarioDTO
             {
@@ -108,9 +108,9 @@ public class PainelServico : IPainelServico
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<ProporcaoUptimeDowntimeDTO>> ObterProporcaoUptimeDowntimeAsync(int clienteId, int? servicoId)
+    public async Task<IEnumerable<ProporcaoUptimeDowntimeDTO>> ObterProporcaoUptimeDowntimeAsync(int clienteId, int? servicoId, int dias)
     {
-        return await FiltrarLogs(clienteId, servicoId)
+        return await FiltrarLogs(clienteId, servicoId, dias)
             .GroupBy(p => new { p.ServicoId, p.Servico.Url })
             .Select(g => new ProporcaoUptimeDowntimeDTO
             {
@@ -122,9 +122,9 @@ public class PainelServico : IPainelServico
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<HeatmapFalhaDTO>> ObterPadraoFalhasHeatmapAsync(int clienteId, int? servicoId)
+    public async Task<IEnumerable<HeatmapFalhaDTO>> ObterPadraoFalhasHeatmapAsync(int clienteId, int? servicoId, int dias)
     {
-        return await FiltrarLogs(clienteId, servicoId)
+        return await FiltrarLogs(clienteId, servicoId, dias)
             .Where(p => EF.Functions.Like(p.Observacao, "%falh%"))
             .Select(p => new { p.HoraPing })
             .GroupBy(p => new { p.HoraPing.DayOfWeek, p.HoraPing.Hour })
@@ -139,9 +139,9 @@ public class PainelServico : IPainelServico
             .ToListAsync();
     }
 
-    public async Task<UltimoPingDTO?> ObterUltimoRegistroPingAsync(int clienteId, int? servicoId)
+    public async Task<UltimoPingDTO?> ObterUltimoRegistroPingAsync(int clienteId, int? servicoId, int dias)
     {
-        return await FiltrarLogs(clienteId, servicoId)
+        return await FiltrarLogs(clienteId, servicoId, dias)
             .OrderByDescending(p => p.HoraPing)
             .Select(p => new UltimoPingDTO
             {
@@ -151,7 +151,7 @@ public class PainelServico : IPainelServico
             .FirstOrDefaultAsync();
     }
 
-    public async Task<IReadOnlyList<UltimoPingDTO>> ObterHistoricoSaudeAsync(int? clienteId, int? servicoId)
+    public async Task<IReadOnlyList<UltimoPingDTO>> ObterHistoricoSaudeAsync(int? clienteId, int? servicoId, int dias)
     {
         var resolvedClienteId = await ResolverClienteIdAsync(clienteId);
         if (resolvedClienteId is null)
@@ -159,7 +159,7 @@ public class PainelServico : IPainelServico
             return Array.Empty<UltimoPingDTO>();
         }
 
-        return await FiltrarLogs(resolvedClienteId.Value, servicoId)
+        return await FiltrarLogs(resolvedClienteId.Value, servicoId, dias)
             .OrderByDescending(p => p.HoraPing)
             .Take(20)
             .Select(p => new UltimoPingDTO
@@ -170,12 +170,9 @@ public class PainelServico : IPainelServico
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<UptimeHoraDTO>> ObterUptime24hAsync(int clienteId, int? servicoId = null)
+    public async Task<IEnumerable<UptimeHoraDTO>> ObterUptime24hAsync(int clienteId, int? servicoId = null, int dias = 1)
     {
-        var limite = DateTime.UtcNow.AddHours(-24);
-
-        return await FiltrarLogs(clienteId, servicoId)
-            .Where(l => l.HoraPing >= limite)
+        return await FiltrarLogs(clienteId, servicoId, dias)
             .GroupBy(l => l.HoraPing.Hour)
             .Select(g => new UptimeHoraDTO
             {
@@ -188,17 +185,14 @@ public class PainelServico : IPainelServico
             .ToListAsync();
     }
 
-    public Task<IEnumerable<IncidentDTO>> ObterIncidentesAsync(int clienteId, int? servicoId)
+    public Task<IEnumerable<IncidentDTO>> ObterIncidentesAsync(int clienteId, int? servicoId, int dias)
     {
-        return _painelRepositorio.ObterIncidentesAsync(clienteId, servicoId);
+        return _painelRepositorio.ObterIncidentesAsync(clienteId, servicoId, dias);
     }
 
     public async Task<IEnumerable<ResponseTimeDTO>> ObterResponseTimeAsync(int clienteId, int? servicoId = null, int dias = 30)
     {
-        var limite = DateTime.UtcNow.AddDays(-dias);
-
-        return await FiltrarLogs(clienteId, servicoId)
-            .Where(l => l.HoraPing >= limite)
+        return await FiltrarLogs(clienteId, servicoId, dias)
             .OrderBy(l => l.HoraPing)
             .Select(l => new ResponseTimeDTO
             {
@@ -208,17 +202,17 @@ public class PainelServico : IPainelServico
             .ToListAsync();
     }
 
-    public Task<List<MotivoFalhaDTO>> ObterMotivosFalhasAsync(int clienteId, int? servicoId)
+    public Task<List<MotivoFalhaDTO>> ObterMotivosFalhasAsync(int clienteId, int? servicoId, int dias)
     {
-        return _painelRepositorio.ObterMotivosFalhasAsync(clienteId, servicoId);
+        return _painelRepositorio.ObterMotivosFalhasAsync(clienteId, servicoId, dias);
     }
 
-    public Task<List<PingPorHoraDTO>> BuscarFalhasPorHoraAsync(int clienteId, int? servicoId)
+    public Task<List<PingPorHoraDTO>> BuscarFalhasPorHoraAsync(int clienteId, int? servicoId, int dias)
     {
-        return _painelRepositorio.BuscarFalhasPorHoraAsync(clienteId, servicoId);
+        return _painelRepositorio.BuscarFalhasPorHoraAsync(clienteId, servicoId, dias);
     }
 
-    private IQueryable<LogPing> FiltrarLogs(int clienteId, int? servicoId)
+    private IQueryable<LogPing> FiltrarLogs(int clienteId, int? servicoId, int? dias)
     {
         var query = _context.LogsPing
             .AsNoTracking()
@@ -227,6 +221,12 @@ public class PainelServico : IPainelServico
         if (servicoId.HasValue)
         {
             query = query.Where(l => l.ServicoId == servicoId.Value);
+        }
+
+        if (dias.HasValue && dias.Value > 0)
+        {
+            var limite = DateTime.UtcNow.AddDays(-dias.Value);
+            query = query.Where(l => l.HoraPing >= limite);
         }
 
         return query;

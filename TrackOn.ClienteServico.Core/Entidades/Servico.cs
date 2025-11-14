@@ -8,5 +8,7 @@ public class Servico : Base
     public int ClienteId { get; set; }
     public Cliente Cliente { get; set; } = null!;
     public int Tipo { get; set; }
+    public bool? UltimoStatusAtivo { get; set; }
+    public DateTime? UltimaNotificacao { get; set; }
     public ICollection<LogPing> LogsPing { get; set; } = new List<LogPing>();
 }

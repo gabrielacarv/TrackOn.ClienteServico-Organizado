@@ -91,7 +91,7 @@ public class PainelRepositorio : IPainelRepositorio
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<IncidentDTO>> ObterIncidentesAsync(int clienteId, int? servicoId)
+    public async Task<IEnumerable<IncidentDTO>> ObterIncidentesAsync(int clienteId, int? servicoId, int dias)
     {
         var query = _context.LogsPing
             .Where(l => l.Servico.ClienteId == clienteId && !l.Ativo);
@@ -99,6 +99,12 @@ public class PainelRepositorio : IPainelRepositorio
         if (servicoId.HasValue)
         {
             query = query.Where(l => l.ServicoId == servicoId.Value);
+        }
+
+        if (dias > 0)
+        {
+            var limite = DateTime.UtcNow.AddDays(-dias);
+            query = query.Where(l => l.HoraPing >= limite);
         }
 
         return await query
@@ -117,7 +123,7 @@ public class PainelRepositorio : IPainelRepositorio
             .ToListAsync();
     }
 
-    public async Task<List<MotivoFalhaDTO>> ObterMotivosFalhasAsync(int clienteId, int? servicoId)
+    public async Task<List<MotivoFalhaDTO>> ObterMotivosFalhasAsync(int clienteId, int? servicoId, int dias)
     {
         var query = _context.LogsPing
             .Where(l => l.Servico.ClienteId == clienteId && !l.Ativo);
@@ -125,6 +131,12 @@ public class PainelRepositorio : IPainelRepositorio
         if (servicoId.HasValue)
         {
             query = query.Where(l => l.ServicoId == servicoId.Value);
+        }
+
+        if (dias > 0)
+        {
+            var limite = DateTime.UtcNow.AddDays(-dias);
+            query = query.Where(l => l.HoraPing >= limite);
         }
 
         return await query
@@ -139,7 +151,7 @@ public class PainelRepositorio : IPainelRepositorio
             .ToListAsync();
     }
 
-    public async Task<List<PingPorHoraDTO>> BuscarFalhasPorHoraAsync(int clienteId, int? servicoId)
+    public async Task<List<PingPorHoraDTO>> BuscarFalhasPorHoraAsync(int clienteId, int? servicoId, int dias)
     {
         var query = _context.LogsPing
             .Where(log => log.Servico.ClienteId == clienteId && EF.Functions.Like(log.Observacao, "%Falh%"));
@@ -147,6 +159,12 @@ public class PainelRepositorio : IPainelRepositorio
         if (servicoId.HasValue)
         {
             query = query.Where(x => x.ServicoId == servicoId.Value);
+        }
+
+        if (dias > 0)
+        {
+            var limite = DateTime.UtcNow.AddDays(-dias);
+            query = query.Where(l => l.HoraPing >= limite);
         }
 
         var dados = await query
