@@ -37,7 +37,7 @@ public class PainelRepositorio : IPainelRepositorio
     public async Task<List<DistribuicaoFalhaDTO>> BuscarDistribuicaoFalhasAsync()
     {
         return await _context.Set<LogPing>()
-            .Where(p => !EF.Functions.Like(p.Observacao, "%sucesso%"))
+            .Where(p => !EF.Functions.Like(p.Observacao, "%ok%"))
             .GroupBy(p => p.Servico.Url)
             .Select(g => new DistribuicaoFalhaDTO
             {
@@ -58,7 +58,7 @@ public class PainelRepositorio : IPainelRepositorio
             .Select(g => new PercentualFalhaDTO
             {
                 Data = g.Key,
-                PercentualDeFalhas = g.Count(p => !EF.Functions.Like(p.Observacao, "%sucesso%")) * 100.0 / g.Count()
+                PercentualDeFalhas = g.Count(p => !EF.Functions.Like(p.Observacao, "%ok%")) * 100.0 / g.Count()
             })
             .OrderBy(r => r.Data)
             .ToListAsync();
@@ -80,7 +80,7 @@ public class PainelRepositorio : IPainelRepositorio
     public async Task<List<TotalPingFalhoServicoDTO>> BuscarPingsFalhasAsync()
     {
         return await _context.Set<LogPing>()
-            .Where(p => !EF.Functions.Like(p.Observacao, "%sucesso%"))
+            .Where(p => !EF.Functions.Like(p.Observacao, "%ok%"))
             .GroupBy(p => p.Servico.Url)
             .Select(g => new TotalPingFalhoServicoDTO
             {
