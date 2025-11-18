@@ -53,12 +53,12 @@ public class ClienteServico : IClienteServico
     {
         var cliente = await _repositorioCliente.ObterClientePorIdAsync(id);
         if (cliente is null)
-        {
             throw new ClienteNaoEncontradoException(id);
-        }
 
-        cliente.Nome = clienteDto.Nome ?? cliente.Nome;
-        cliente.Email = clienteDto.Email ?? cliente.Email;
+        cliente.AtualizarDados(
+            nome: clienteDto.Nome,
+            email: clienteDto.Email
+        );
 
         await _repositorioCliente.AtualizarClienteAsync(cliente);
     }

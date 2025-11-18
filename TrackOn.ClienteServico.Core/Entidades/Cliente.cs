@@ -10,4 +10,13 @@ public class Cliente
     public string HashSenha { get; set; } = string.Empty;
     public DateTime CriadoEm { get; set; } = DateTime.UtcNow;
     public bool Ativo { get; set; }
+
+    public void AtualizarDados(string? nome, string? email)
+    {
+        if (!string.IsNullOrWhiteSpace(nome))
+            Nome = nome;
+
+        if (!string.IsNullOrWhiteSpace(email))
+            Email = email;
+    }
 }

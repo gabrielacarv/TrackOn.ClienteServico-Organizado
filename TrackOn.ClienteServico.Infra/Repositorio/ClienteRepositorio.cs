@@ -39,6 +39,7 @@ public class ClienteRepositorio : IClienteRepositorio
     public async Task AtualizarClienteAsync(Cliente cliente)
     {
         _contexto.Clientes.Update(cliente);
+        _contexto.Entry(cliente).Property(c => c.CriadoEm).IsModified = false;
         await _contexto.SaveChangesAsync();
     }
 }
