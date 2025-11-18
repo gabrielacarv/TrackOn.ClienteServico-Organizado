@@ -58,11 +58,20 @@ public class AplicacaoDbContexto : DbContext
             entity.Property(e => e.StatusCode).HasColumnName("statuscode");
             entity.Property(e => e.StatusDescricao).HasColumnName("statusdescricao");
 
-            // Relação: LogPing (N) -> (1) Servico
             entity.HasOne(e => e.Servico)
                   .WithMany(s => s.LogsPing)
                   .HasForeignKey(e => e.ServicoId);
         });
 
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            foreach (var property in entityType.GetProperties())
+            {
+                if (property.ClrType == typeof(DateTime) || property.ClrType == typeof(DateTime?))
+                {
+                    property.SetColumnType("timestamp without time zone");
+                }
+            }
+        }
     }
 }
