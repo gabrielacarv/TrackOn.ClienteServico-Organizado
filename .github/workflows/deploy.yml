@@ -43,3 +43,4 @@ jobs:
           sudo systemctl daemon-reload
           sudo systemctl start clienteservico.service
           sudo systemctl status clienteservico.service --no-pager
+
