@@ -9,31 +9,34 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+    - name: Checkout
+      uses: actions/checkout@v3
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: '8.0.x'
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x'
 
-      - name: Publish Release
-        run: dotnet publish -c Release -o publish/
+    - name: Publish Release for Linux
+      run: |
+        dotnet publish TrackOn.ClienteServico-Organizado/TrackOn.ClienteServico.API/TrackOn.ClienteServico.API.csproj \
+        -c Release -o publish/ --self-contained true -r linux-x64
 
-      - name: Upload to EC2
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_KEY }}
-          source: "publish/*"
-          target: "/var/www/trackon-cliente"
+    - name: Upload to EC2
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_KEY }}
+        source: "publish/*"
+        target: "/var/www/trackon-cliente"
 
-      - name: Restart API
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_KEY }}
-          script: |
-            sudo systemctl restart clienteservico
+    - name: Restart API
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_KEY }}
+        script: |
+          sudo systemctl restart clienteservico.service
+          sudo systemctl status clienteservico.service --no-pager
