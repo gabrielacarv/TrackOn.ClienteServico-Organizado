@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
+    - name: Checkout Source Code
       uses: actions/checkout@v3
 
     - name: Setup .NET
@@ -17,9 +17,9 @@ jobs:
       with:
         dotnet-version: '8.0.x'
 
-    - name: Publish Release for Linux
+    - name: Publish API (Linux Self-Contained)
       run: |
-        dotnet publish TrackOn.ClienteServico-Organizado/TrackOn.ClienteServico.API/TrackOn.ClienteServico.API.csproj \
+        dotnet publish TrackOn.ClienteServico.API/TrackOn.ClienteServico.API.csproj \
         -c Release -o publish/ --self-contained true -r linux-x64
 
     - name: Upload to EC2
@@ -29,14 +29,17 @@ jobs:
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_KEY }}
         source: "publish/*"
-        target: "/var/www/trackon-cliente"
+        target: "/var/www/trackon-cliente/"
+        overwrite: true
 
-    - name: Restart API
+    - name: Restart API via Systemd
       uses: appleboy/ssh-action@v1.0.0
       with:
         host: ${{ secrets.EC2_HOST }}
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_KEY }}
         script: |
-          sudo systemctl restart clienteservico.service
+          sudo systemctl stop clienteservico.service || true
+          sudo systemctl daemon-reload
+          sudo systemctl start clienteservico.service
           sudo systemctl status clienteservico.service --no-pager
