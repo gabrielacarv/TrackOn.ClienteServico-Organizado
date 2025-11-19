@@ -1,4 +1,4 @@
-name: Deploy Front
+name: Deploy Frontend
 
 on:
   push:
@@ -10,20 +10,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
+    - name: Checkout Repo
       uses: actions/checkout@v3
 
-    - name: Setup Node
+    - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: "18"
+        node-version: 18
 
-    - name: Build React App
+    - name: Install & Build
       run: |
         npm install
         npm run build
 
-    - name: Prepare Web Directory
+    - name: Clean Remote Web Folder
       uses: appleboy/ssh-action@v1.0.0
       with:
         host: ${{ secrets.EC2_HOST }}
@@ -34,7 +34,7 @@ jobs:
           sudo mkdir -p /var/www/trackon-web
           sudo chown -R ec2-user:ec2-user /var/www/trackon-web
 
-    - name: Upload Build Files (Correct Structure)
+    - name: Upload Build Files
       uses: appleboy/scp-action@v0.1.7
       with:
         host: ${{ secrets.EC2_HOST }}
@@ -44,7 +44,7 @@ jobs:
         strip_components: 1
         target: "/var/www/trackon-web/"
 
-    - name: Finalize & Restart Nginx
+    - name: Fix Permissions & Restart Nginx
       uses: appleboy/ssh-action@v1.0.0
       with:
         host: ${{ secrets.EC2_HOST }}
@@ -54,4 +54,4 @@ jobs:
           sudo chown -R nginx:nginx /var/www/trackon-web
           sudo chmod -R 755 /var/www/trackon-web
           sudo systemctl restart nginx
-          echo "Frontend atualizado com sucesso!"
+          echo "Frontend deploy concluído!"
