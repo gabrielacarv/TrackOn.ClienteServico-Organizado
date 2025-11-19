@@ -20,10 +20,27 @@ jobs:
     - name: Publish API (Linux Self-Contained)
       run: |
         dotnet publish TrackOn.ClienteServico.API/TrackOn.ClienteServico.API.csproj \
-        -c Release \
-        -o publish/ \
-        --self-contained true \
-        -r linux-x64
+          -c Release \
+          -o publish/ \
+          --self-contained true \
+          -r linux-x64
+
+    - name: Stop service and clean target folder on EC2
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_KEY }}
+        script: |
+          echo "Parando serviço..."
+          sudo systemctl stop clienteservico.service || true
+
+          echo "Limpando pasta /var/www/trackon-cliente..."
+          sudo rm -rf /var/www/trackon-cliente
+
+          echo "Recriando pasta..."
+          sudo mkdir -p /var/www/trackon-cliente
+          sudo chown ec2-user:ec2-user /var/www/trackon-cliente
 
     - name: Upload new build to EC2
       uses: appleboy/scp-action@v0.1.7
@@ -43,9 +60,6 @@ jobs:
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_KEY }}
         script: |
-          echo "Parando serviço..."
-          sudo systemctl stop clienteservico.service || true
-
           echo "Reload no daemon..."
           sudo systemctl daemon-reload
 
