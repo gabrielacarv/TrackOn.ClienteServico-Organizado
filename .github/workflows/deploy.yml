@@ -20,23 +20,10 @@ jobs:
     - name: Publish API (Linux Self-Contained)
       run: |
         dotnet publish TrackOn.ClienteServico.API/TrackOn.ClienteServico.API.csproj \
-        -c Release -o publish/ --self-contained true -r linux-x64
-
-    # 🔥 REMOVE ANTES DE COPIAR (soluciona o seu problema)
-    - name: Clean Target Folder on EC2
-      uses: appleboy/ssh-action@v1.0.0
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USER }}
-        key: ${{ secrets.EC2_KEY }}
-        script: |
-          echo ">> Parando serviço..."
-          sudo systemctl stop clienteservico.service || true
-
-          echo ">> Removendo arquivos antigos..."
-          sudo rm -rf /var/www/trackon-cliente/*
-
-          echo ">> Pasta limpa com sucesso."
+        -c Release \
+        -o publish/ \
+        --self-contained true \
+        -r linux-x64
 
     - name: Upload new build to EC2
       uses: appleboy/scp-action@v0.1.7
@@ -44,9 +31,10 @@ jobs:
         host: ${{ secrets.EC2_HOST }}
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_KEY }}
-        source: "publish/*"
-        target: "/var/www/trackon-cliente/"
+        source: "publish/**"
+        target: "/var/www/trackon-cliente"
         overwrite: true
+        strip_components: 1
 
     - name: Restart API via Systemd
       uses: appleboy/ssh-action@v1.0.0
@@ -55,13 +43,14 @@ jobs:
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_KEY }}
         script: |
-          echo ">> Recarregando systemd..."
+          echo "Parando serviço..."
+          sudo systemctl stop clienteservico.service || true
+
+          echo "Reload no daemon..."
           sudo systemctl daemon-reload
 
-          echo ">> Iniciando serviço..."
+          echo "Iniciando serviço..."
           sudo systemctl start clienteservico.service
 
-          echo ">> Verificando status..."
+          echo "Status do serviço:"
           sudo systemctl status clienteservico.service --no-pager
-
-          echo ">> Deploy concluído."
