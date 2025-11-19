@@ -1,6 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using TrackOn.ClienteServico.Core.Entidades;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace TrackOn.ClienteServico.Infra;
 
@@ -17,30 +16,6 @@ public class AplicacaoDbContexto : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        var converter = new ValueConverter<DateTime, DateTime>(
-            v => DateTime.SpecifyKind(v, DateTimeKind.Unspecified),
-            v => DateTime.SpecifyKind(v, DateTimeKind.Unspecified)
-        );
-
-        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
-        {
-            foreach (var property in entityType.GetProperties())
-            {
-                if (property.ClrType == typeof(DateTime))
-                    property.SetValueConverter(converter);
-
-                if (property.ClrType == typeof(DateTime?))
-                {
-                    var nullableConverter = new ValueConverter<DateTime?, DateTime?>(
-                        v => v.HasValue ? DateTime.SpecifyKind(v.Value, DateTimeKind.Unspecified) : v,
-                        v => v.HasValue ? DateTime.SpecifyKind(v.Value, DateTimeKind.Unspecified) : v
-                    );
-
-                    property.SetValueConverter(nullableConverter);
-                }
-            }
-        }
-
         modelBuilder.Entity<Cliente>(entity =>
         {
             entity.ToTable("cliente");
