@@ -38,7 +38,7 @@ public class PainelServico : IPainelServico
     public async Task<IEnumerable<DistribuicaoFalhaDTO>> ObterDistribuicaoFalhasAsync(int clienteId, int? servicoId, int dias)
     {
         return await FiltrarLogs(clienteId, servicoId, dias)
-            .Where(l => !EF.Functions.Like(l.Observacao, "%ok%"))
+            .Where(l => !EF.Functions.Like(l.Observacao.ToLower(), "%ok%"))
             .GroupBy(l => l.Servico.Url)
             .Select(g => new DistribuicaoFalhaDTO
             {
@@ -57,7 +57,7 @@ public class PainelServico : IPainelServico
             {
                 Data = g.Key,
                 PercentualDeFalhas = g.Any()
-                    ? g.Count(l => !EF.Functions.Like(l.Observacao, "%ok%")) * 100.0 / g.Count()
+                    ? g.Count(l => !EF.Functions.Like(l.Observacao.ToLower(), "%ok%")) * 100.0 / g.Count()
                     : 0
             })
             .OrderBy(x => x.Data)
@@ -80,7 +80,7 @@ public class PainelServico : IPainelServico
     public async Task<IEnumerable<TotalPingFalhoServicoDTO>> ObterTotalPingsFalhosPorServicoAsync(int clienteId, int? servicoId, int dias)
     {
         return await FiltrarLogs(clienteId, servicoId, dias)
-            .Where(l => !EF.Functions.Like(l.Observacao, "%ok%"))
+            .Where(l => !EF.Functions.Like(l.Observacao.ToLower(), "%ok%"))
             .GroupBy(l => l.Servico.Url)
             .Select(g => new TotalPingFalhoServicoDTO
             {
@@ -100,7 +100,7 @@ public class PainelServico : IPainelServico
                 Data = g.Key.Data,
                 IdServico = g.Key.ServicoId,
                 PorcentagemDeDisponibilidade = Math.Round(
-                    g.Count(p => EF.Functions.Like(p.Observacao, "%ok%")) * 100.0 / g.Count(),
+                    g.Count(p => EF.Functions.Like(p.Observacao.ToLower(), "%ok%")) * 100.0 / g.Count(),
                     2)
             })
             .OrderBy(r => r.Data)
@@ -115,8 +115,8 @@ public class PainelServico : IPainelServico
             .Select(g => new ProporcaoUptimeDowntimeDTO
             {
                 NomeServico = g.Key.Url ?? string.Empty,
-                QuantidadeDisponivel = g.Count(p => EF.Functions.Like(p.Observacao, "%ok%")),
-                QuantidadeIndisponivel = g.Count(p => EF.Functions.Like(p.Observacao, "%falh%"))
+                QuantidadeDisponivel = g.Count(p => EF.Functions.Like(p.Observacao.ToLower(), "%ok%")),
+                QuantidadeIndisponivel = g.Count(p => EF.Functions.Like(p.Observacao.ToLower(), "%falh%"))
             })
             .OrderByDescending(r => r.QuantidadeIndisponivel)
             .ToListAsync();
@@ -125,7 +125,7 @@ public class PainelServico : IPainelServico
     public async Task<IEnumerable<HeatmapFalhaDTO>> ObterPadraoFalhasHeatmapAsync(int clienteId, int? servicoId, int dias)
     {
         return await FiltrarLogs(clienteId, servicoId, dias)
-            .Where(p => EF.Functions.Like(p.Observacao, "%falh%"))
+            .Where(p => EF.Functions.Like(p.Observacao.ToLower(), "%falh%"))
             .Select(p => new { p.HoraPing })
             .GroupBy(p => new { p.HoraPing.DayOfWeek, p.HoraPing.Hour })
             .Select(g => new HeatmapFalhaDTO
@@ -178,7 +178,7 @@ public class PainelServico : IPainelServico
             {
                 Hora = g.Key,
                 Total = g.Count(),
-                QuantidadeSucesso = g.Count(x =>  EF.Functions.Like(x.Observacao.ToLower(), "%ok%")),
+                QuantidadeSucesso = g.Count(x => EF.Functions.Like(x.Observacao.ToLower(), "%ok%")),
                 QuantidadeFalha = g.Count(x => EF.Functions.Like(x.Observacao.ToLower(), "%falha%"))
             })
             .OrderBy(x => x.Hora)
